@@ -5,7 +5,6 @@ import 'colors.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -23,44 +22,35 @@ class MyApp extends StatelessWidget {
 }
 
 class AppPage extends StatelessWidget {
-  final String title = 'BASiL';
-
-  Widget _buildBackDrop() {
-    return Backdrop(
-      backLayer: Container(
-        color: colorSecondaryLight,
-      ),
-      frontLayer: ListView(
-        padding: EdgeInsets.symmetric(
-          horizontal: 20.0,
-        ),
-        children: <Widget>[
-          Center(
-            child: Text(
-              this.title,
-              style: TextStyle(
-                color: colorPrimaryDark,
-                fontSize: 60.0,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Image.asset('assets/images/cream_presto_pasta.jpg'),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final EdgeInsets systemPadding = MediaQuery.of(context).padding;
     return Scaffold(
+      backgroundColor: colorSecondaryLight,
       body: Stack(
-        alignment: Alignment.topCenter,
         children: <Widget>[
-          Transform(
-            transform: Matrix4.translationValues(0.0, -2.0, 0.0),
-            child: _buildBackDrop(),
+          Backdrop(
+            backLayer: Menu(),
+            frontLayer: Column(
+              children: <Widget>[
+                Transform(
+                  transform: Matrix4.translationValues(0.0, -2.0, 0.0),
+                  child: Center(
+                    child: Text(
+                      'BASiL',
+                      style: TextStyle(
+                        color: colorPrimaryDark,
+                        fontSize: 60.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Image.asset('assets/images/cream_presto_pasta.jpg'),
+                ),
+              ],
+            ),
           ),
           Container(
             color: colorPrimaryLight,
@@ -68,6 +58,60 @@ class AppPage extends StatelessWidget {
             width: double.infinity,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class Menu extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: double.infinity,
+      width: double.infinity,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: colorPrimaryLight,
+                  width: 3.0,
+                ),
+                shape: BoxShape.circle,
+              ),
+              padding: const EdgeInsets.all(10.0),
+              child: Icon(
+                Icons.bookmark_border,
+                color: colorPrimaryDark,
+              ),
+            ),
+            SizedBox(
+              height: 15.0,
+            ),
+            Text(
+              'SHOPPING LIST',
+              style: TextStyle(
+                color: colorPrimary,
+                fontSize: 24.0,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(
+              height: 40.0,
+            ),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: colorPrimaryLight,
+                  width: 3.0,
+                ),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

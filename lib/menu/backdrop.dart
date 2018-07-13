@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
-const double _minDistance = 60.0;
-const double _revealVelocity = 2.0;
+const double _kMinFlingVelocity = 700.0;
+const double _kMinFlingVelocityDelta = 400.0;
+const double _kFlingVelocityScale = 1.0 / 300.0;
+
+enum _FlingGestureKind { none, forward, reverse }
 
 class Backdrop extends StatefulWidget {
   final Widget backLayer;
@@ -10,8 +13,8 @@ class Backdrop extends StatefulWidget {
   const Backdrop({
     @required this.backLayer,
     @required this.frontLayer,
-  }) : assert(backLayer != null),
-       assert(frontLayer != null);
+  })  : assert(backLayer != null),
+        assert(frontLayer != null);
 
   @override
   _BackdropState createState() => _BackdropState();
@@ -19,71 +22,114 @@ class Backdrop extends StatefulWidget {
 
 class _BackdropState extends State<Backdrop>
     with SingleTickerProviderStateMixin {
-  final GlobalKey _backdropKey = GlobalKey(debugLabel: 'Backdrop');
+  AnimationController _moveController;
+  Animation<RelativeRect> _moveAnimation;
 
-  AnimationController _controller;
+  double _dragExtent = 0.0;
+  bool _dragUnderway = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _moveController = AnimationController(
       duration: Duration(milliseconds: 300),
-      value: 1.0,
       vsync: this,
     );
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _moveController.dispose();
     super.dispose();
   }
 
-  bool get _frontLayerVisible {
-    final AnimationStatus status = _controller.status;
-    return status == AnimationStatus.completed ||
-        status == AnimationStatus.forward;
+  bool get _isActive {
+    return _dragUnderway || _moveController.isAnimating;
   }
 
-  void _toggleBackdropLayerVisibility() {
-    _controller.fling(
-        velocity: _frontLayerVisible ? -_revealVelocity : _revealVelocity,
-    );
+  double get _overallDragAxisExtent {
+    return context.size.height;
+  }
+
+  _FlingGestureKind _describeFlingGesture(Velocity velocity) {
+    if (_dragExtent == 0.0) {
+      return _FlingGestureKind.none;
+    }
+
+    final double vx = velocity.pixelsPerSecond.dx;
+    final double vy = velocity.pixelsPerSecond.dy;
+
+    if (vy.abs() - vx.abs() < _kMinFlingVelocityDelta ||
+        vy.abs() < _kMinFlingVelocity) {
+      return _FlingGestureKind.none;
+    }
+
+    if (vy > 0.0) {
+      return _FlingGestureKind.forward;
+    }
+    return _FlingGestureKind.reverse;
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    _dragUnderway = true;
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    if (!_isActive || _moveController.isAnimating) {
+      return;
+    }
+
+    final double delta = details.primaryDelta;
+
+    _dragExtent += delta;
+
+    if (_moveController.isAnimating) {
+      _moveController.value = _dragExtent.abs() / _overallDragAxisExtent;
+    }
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    if (!_isActive || _moveController.isAnimating) {
+      return;
+    }
+    _dragUnderway = false;
+
+    final double flingVelocity = details.velocity.pixelsPerSecond.dy;
+    switch (_describeFlingGesture(details.velocity)) {
+      case _FlingGestureKind.forward:
+        _dragExtent = flingVelocity.sign;
+        _moveController.fling(
+          velocity: flingVelocity.abs() * _kFlingVelocityScale,
+        );
+        break;
+      case _FlingGestureKind.reverse:
+        _dragExtent = flingVelocity.sign;
+        _moveController.fling(
+          velocity: -flingVelocity.abs() * _kFlingVelocityScale,
+        );
+        break;
+      case _FlingGestureKind.none:
+        break;
+    }
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
+    const double layerTitleHeight = 40.0;
     final Size layerSize = constraints.biggest;
-    final double layerTop = layerSize.height - 33.0;
+    final double layerTop = layerSize.height - layerTitleHeight;
 
-    //print(">>>> Layer size: $layerSize");
-    //print(">>>> Layer height: ${layerSize.height}");
-    //print(">>>> Layer top: $layerTop");
-
-    final Animation<RelativeRect> layerAnimation = RelativeRectTween(
-      begin: RelativeRect.fromLTRB(
+    _moveAnimation = RelativeRectTween(
+      begin: RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0),
+      end: RelativeRect.fromLTRB(
           0.0, layerTop, 0.0, layerTop - layerSize.height),
-      end: RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0),
-    ).animate(_controller);
+    ).animate(_moveController);
 
     return Stack(
-      key: _backdropKey,
       children: <Widget>[
-        GestureDetector(
-          onTap: () {
-            _toggleBackdropLayerVisibility();
-          },
-          child: widget.backLayer,
-        ),
-        Positioned.fill(
-          child: GestureDetector(
-            onVerticalDragStart: (details) {
-              print(">> Global: ${details.globalPosition}");
-            },
-            onTap: () {
-              _toggleBackdropLayerVisibility();
-            },
-            child: widget.frontLayer,
-          ),
+        widget.backLayer,
+        PositionedTransition(
+          rect: _moveAnimation,
+          child: widget.frontLayer,
         ),
       ],
     );
@@ -91,6 +137,13 @@ class _BackdropState extends State<Backdrop>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: _buildStack);
+    return GestureDetector(
+      onVerticalDragEnd: _handleDragEnd,
+      onVerticalDragStart: _handleDragStart,
+      onVerticalDragUpdate: _handleDragUpdate,
+      child: LayoutBuilder(
+        builder: _buildStack,
+      ),
+    );
   }
 }
