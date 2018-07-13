@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+const double _minDistance = 60.0;
 const double _revealVelocity = 2.0;
 
 class Backdrop extends StatefulWidget {
@@ -52,7 +53,11 @@ class _BackdropState extends State<Backdrop>
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
     final Size layerSize = constraints.biggest;
-    final double layerTop = layerSize.height - 40.0;
+    final double layerTop = layerSize.height - 33.0;
+
+    //print(">>>> Layer size: $layerSize");
+    //print(">>>> Layer height: ${layerSize.height}");
+    //print(">>>> Layer top: $layerTop");
 
     final Animation<RelativeRect> layerAnimation = RelativeRectTween(
       begin: RelativeRect.fromLTRB(
@@ -69,12 +74,9 @@ class _BackdropState extends State<Backdrop>
           },
           child: widget.backLayer,
         ),
-        PositionedTransition(
-          rect: layerAnimation,
+        Positioned.fill(
           child: GestureDetector(
-            onVerticalDragUpdate: (details) {
-              //print(">> Delta: ${details.delta}");
-              //print(">> Primary: ${details.primaryDelta}");
+            onVerticalDragStart: (details) {
               print(">> Global: ${details.globalPosition}");
             },
             onTap: () {
@@ -89,8 +91,6 @@ class _BackdropState extends State<Backdrop>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: LayoutBuilder(builder: _buildStack),
-    );
+    return LayoutBuilder(builder: _buildStack);
   }
 }

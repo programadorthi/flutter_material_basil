@@ -17,13 +17,7 @@ class MyApp extends StatelessWidget {
         primaryColorDark: colorPrimaryDark,
         primaryColorLight: colorPrimaryLight,
       ),
-      //home: AppPage(title: 'BASiL'),
-      home: Backdrop(
-        backLayer: Container(
-          color: colorSecondaryLight,
-        ),
-        frontLayer: AppPage(),
-      ),
+      home: AppPage(),
     );
   }
 }
@@ -31,27 +25,29 @@ class MyApp extends StatelessWidget {
 class AppPage extends StatelessWidget {
   final String title = 'BASiL';
 
-  Widget _buildTopLogo(EdgeInsets systemPadding) {
-    return Stack(
-      alignment: Alignment.topCenter,
-      children: <Widget>[
-        Transform(
-          transform: Matrix4.translationValues(0.0, -5.0, 0.0),
-          child: Text(
-            this.title,
-            style: TextStyle(
-              color: colorPrimaryDark,
-              fontSize: 60.0,
-              fontWeight: FontWeight.w600,
+  Widget _buildBackDrop() {
+    return Backdrop(
+      backLayer: Container(
+        color: colorSecondaryLight,
+      ),
+      frontLayer: ListView(
+        padding: EdgeInsets.symmetric(
+          horizontal: 20.0,
+        ),
+        children: <Widget>[
+          Center(
+            child: Text(
+              this.title,
+              style: TextStyle(
+                color: colorPrimaryDark,
+                fontSize: 60.0,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
-        ),
-        Container(
-          color: colorPrimaryLight,
-          height: systemPadding.top,
-          width: double.infinity,
-        ),
-      ],
+          Image.asset('assets/images/cream_presto_pasta.jpg'),
+        ],
+      ),
     );
   }
 
@@ -59,14 +55,20 @@ class AppPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final EdgeInsets systemPadding = MediaQuery.of(context).padding;
     return Scaffold(
-      body: Column(
+      body: Stack(
+        alignment: Alignment.topCenter,
         children: <Widget>[
-          _buildTopLogo(systemPadding),
-          Expanded(
-            child: Image.asset('assets/images/cream_presto_pasta.jpg'),
+          Transform(
+            transform: Matrix4.translationValues(0.0, -2.0, 0.0),
+            child: _buildBackDrop(),
+          ),
+          Container(
+            color: colorPrimaryLight,
+            height: systemPadding.top,
+            width: double.infinity,
           ),
         ],
-      )
+      ),
     );
   }
 }
