@@ -26,6 +26,27 @@ class MyApp extends StatelessWidget {
 }
 
 class AppPage extends StatelessWidget {
+
+  Widget _buildBackdrop() {
+    return Backdrop(
+      backLayer: Navigation(),
+      frontLayer: Column(
+        children: <Widget>[
+          _buildTitle(),
+          Expanded(
+            child: RecipesWidget(),
+          ),
+          Image.asset(
+            'assets/images/chevron-down.png',
+            color: colorPrimary,
+            height: 50.0,
+            width: 50.0,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTitle() {
     return Transform(
       transform: Matrix4.translationValues(0.0, -2.0, 0.0),
@@ -49,25 +70,7 @@ class AppPage extends StatelessWidget {
       backgroundColor: colorSecondaryLight,
       body: Stack(
         children: <Widget>[
-          Backdrop(
-            backLayer: Navigation(),
-            frontLayer: Column(
-              children: <Widget>[
-                _buildTitle(),
-                Expanded(
-                  child: RecipesWidget(),
-                ),
-                Transform.rotate(
-                  angle: math.pi / 2,
-                  child: Icon(
-                    Icons.arrow_forward_ios,
-                    color: colorPrimary,
-                    size: 40.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildBackdrop(),
           Container(
             color: colorPrimaryLight,
             height: systemPadding.top,

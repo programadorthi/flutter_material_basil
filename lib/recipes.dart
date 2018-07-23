@@ -83,7 +83,7 @@ class RecipeView extends StatelessWidget {
         item.title,
         style: TextStyle(
           color: colorSecondaryDark,
-          fontSize: 100.0,
+          fontSize: 50.0,
           fontWeight: FontWeight.w600,
         ),
         textAlign: TextAlign.center,
@@ -95,21 +95,23 @@ class RecipeView extends StatelessWidget {
       fit: BoxFit.cover,
     );
 
-    return Stack(
+    return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(
-            left: 20.0,
-            right: 20.0,
-            top: 60.0,
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 30.0
+            ),
+            child: image,
           ),
-          child: image,
         ),
-        Positioned(
-          bottom: 56.0,
-          left: 0.0,
-          right: 0.0,
-          child: titleText,
+        SizedBox(
+          height: 150.0,
+          width: double.infinity,
+          child: Center(
+            child: titleText,
+          ),
         ),
       ],
     );
