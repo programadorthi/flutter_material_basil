@@ -1,6 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_material_basil/menu/backdrop.dart';
-import 'colors.dart';
+import 'package:flutter_material_basil/menu/navigation.dart';
+import 'package:flutter_material_basil/recipes.dart';
+import 'package:flutter_material_basil/shared/colors.dart';
 
 void main() => runApp(MyApp());
 
@@ -22,6 +26,22 @@ class MyApp extends StatelessWidget {
 }
 
 class AppPage extends StatelessWidget {
+  Widget _buildTitle() {
+    return Transform(
+      transform: Matrix4.translationValues(0.0, -2.0, 0.0),
+      child: Center(
+        child: Text(
+          'BASiL',
+          style: TextStyle(
+            color: colorPrimaryDark,
+            fontSize: 60.0,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final EdgeInsets systemPadding = MediaQuery.of(context).padding;
@@ -30,24 +50,20 @@ class AppPage extends StatelessWidget {
       body: Stack(
         children: <Widget>[
           Backdrop(
-            backLayer: Menu(),
+            backLayer: Navigation(),
             frontLayer: Column(
               children: <Widget>[
-                Transform(
-                  transform: Matrix4.translationValues(0.0, -2.0, 0.0),
-                  child: Center(
-                    child: Text(
-                      'BASiL',
-                      style: TextStyle(
-                        color: colorPrimaryDark,
-                        fontSize: 60.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
+                _buildTitle(),
                 Expanded(
-                  child: Image.asset('assets/images/cream_presto_pasta.jpg'),
+                  child: RecipesWidget(),
+                ),
+                Transform.rotate(
+                  angle: math.pi / 2,
+                  child: Icon(
+                    Icons.arrow_forward_ios,
+                    color: colorPrimary,
+                    size: 40.0,
+                  ),
                 ),
               ],
             ),
@@ -58,60 +74,6 @@ class AppPage extends StatelessWidget {
             width: double.infinity,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class Menu extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: double.infinity,
-      width: double.infinity,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: colorPrimaryLight,
-                  width: 3.0,
-                ),
-                shape: BoxShape.circle,
-              ),
-              padding: const EdgeInsets.all(10.0),
-              child: Icon(
-                Icons.bookmark_border,
-                color: colorPrimaryDark,
-              ),
-            ),
-            SizedBox(
-              height: 15.0,
-            ),
-            Text(
-              'SHOPPING LIST',
-              style: TextStyle(
-                color: colorPrimary,
-                fontSize: 24.0,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(
-              height: 40.0,
-            ),
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: colorPrimaryLight,
-                  width: 3.0,
-                ),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

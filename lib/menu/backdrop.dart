@@ -23,7 +23,8 @@ class Backdrop extends StatefulWidget {
 class _BackdropState extends State<Backdrop>
     with SingleTickerProviderStateMixin {
   AnimationController _moveController;
-  Animation<RelativeRect> _moveAnimation;
+  Animation<RelativeRect> _backAnimation;
+  Animation<RelativeRect> _frontAnimation;
 
   double _dragExtent = 0.0;
   bool _dragUnderway = false;
@@ -97,12 +98,14 @@ class _BackdropState extends State<Backdrop>
     final double flingVelocity = details.velocity.pixelsPerSecond.dy;
     switch (_describeFlingGesture(details.velocity)) {
       case _FlingGestureKind.forward:
+        print(">>>> Forward");
         _dragExtent = flingVelocity.sign;
         _moveController.fling(
           velocity: flingVelocity.abs() * _kFlingVelocityScale,
         );
         break;
       case _FlingGestureKind.reverse:
+        print(">>>> Reverse");
         _dragExtent = flingVelocity.sign;
         _moveController.fling(
           velocity: -flingVelocity.abs() * _kFlingVelocityScale,
@@ -113,22 +116,40 @@ class _BackdropState extends State<Backdrop>
     }
   }
 
+  // TODO Only for tests purpose. It will be removed.
+  void _test() {
+    if (_moveController.isCompleted) {
+      _moveController.reverse();
+    } else {
+      _moveController.forward();
+    }
+  }
+
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
     const double layerTitleHeight = 40.0;
     final Size layerSize = constraints.biggest;
     final double layerTop = layerSize.height - layerTitleHeight;
 
-    _moveAnimation = RelativeRectTween(
+    _backAnimation = RelativeRectTween(
+      begin: RelativeRect.fromLTRB(
+          0.0, -layerSize.height - layerTop, 0.0, 0.0),
+      end: RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0),
+    ).animate(_moveController);
+
+    _frontAnimation = RelativeRectTween(
       begin: RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0),
       end: RelativeRect.fromLTRB(
-          0.0, layerTop, 0.0, layerTop - layerSize.height),
+          0.0, layerTop, 0.0,  -layerSize.height),
     ).animate(_moveController);
 
     return Stack(
       children: <Widget>[
-        widget.backLayer,
         PositionedTransition(
-          rect: _moveAnimation,
+          rect: _backAnimation,
+          child: widget.backLayer,
+        ),
+        PositionedTransition(
+          rect: _frontAnimation,
           child: widget.frontLayer,
         ),
       ],
@@ -138,6 +159,7 @@ class _BackdropState extends State<Backdrop>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: _test,
       onVerticalDragEnd: _handleDragEnd,
       onVerticalDragStart: _handleDragStart,
       onVerticalDragUpdate: _handleDragUpdate,
