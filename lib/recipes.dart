@@ -5,11 +5,11 @@ import 'package:flutter_material_basil/shared/page_transformer.dart';
 final recipes = <RecipeItem>[
   RecipeItem(
     imageAsset: 'assets/images/herb_roasted_chicken.jpeg',
-    title: 'Herb Roasted Chicken',
+    title: 'Herb Roasted\nChicken',
   ),
   RecipeItem(
     imageAsset: 'assets/images/cream_presto_pasta.jpg',
-    title: 'Cream Presto Pasta',
+    title: 'Cream Presto\nPasta',
   ),
   RecipeItem(
     imageAsset: 'assets/images/beef_pot_pie.jpg',
@@ -78,12 +78,11 @@ class RecipeView extends StatelessWidget {
 
   Widget _buildContainer(BuildContext context, BoxConstraints constraints) {
     var titleText = _applyTextEffects(
-      translationFactor: 200.0,
+      translationFactor: 50.0,
       child: Text(
         item.title,
         style: TextStyle(
           color: colorSecondaryDark,
-          fontSize: 100.0,
           fontWeight: FontWeight.w600,
         ),
         textAlign: TextAlign.center,
@@ -95,7 +94,7 @@ class RecipeView extends StatelessWidget {
       fit: BoxFit.cover,
     );
 
-    return Stack(
+    return Column(
       children: [
         Padding(
           padding: const EdgeInsets.only(
@@ -105,11 +104,11 @@ class RecipeView extends StatelessWidget {
           ),
           child: image,
         ),
-        Positioned(
-          bottom: 56.0,
-          left: 0.0,
-          right: 0.0,
-          child: titleText,
+        Expanded(
+          child: FittedBox(
+            fit: BoxFit.fitWidth,
+            child: titleText,
+          ),
         ),
       ],
     );
